@@ -1,7 +1,0 @@
-QMainWindow {
-    background: black;
-}
-
-QLabel {
-    color: white;
-}
