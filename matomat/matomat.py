@@ -72,10 +72,11 @@ def init_db():
 
 @app.route('/add/item', methods=['POST'])
 def add_item():
+    item_info = request.get_json(force=True)  # type: dict
     if not session.get('logged_in'):
         abort(401)
-    price = evaluate_price(request.form['price'])
-    color = request.form['color']
+    price = evaluate_price(item_info['price'])
+    color = item_info['color']
     filename = None
     # check if the post request has the file part
     if 'file' in request.files:
@@ -91,9 +92,9 @@ def add_item():
             color = None
     db = get_db()
     db.execute('INSERT INTO Products (name, price, image_link, color) VALUES (?, ?, ?, ?)',
-               [request.form['title'], price, filename, color])
+               [item_info['title'], price, filename, color])
     db.commit()
-    return json.dumps('New item was successfully added.')
+    return get_item()
 
 
 def evaluate_price(price: str):
@@ -134,7 +135,7 @@ def get_item(identifier):
         abort(400)
     item_for_json = {'id': item[0], 'title': item[1], 'price': item[2]}
     if item[3]:
-        item_for_json.update({'image_link': item[3]})
+        item_for_json.update({'image_link': f'static/images/{item[3]}'})
     if item[4]:
         item_for_json.update({'color': item[4]})
     return json.dumps(item_for_json)
