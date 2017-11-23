@@ -109,6 +109,26 @@ def evaluate_price(price: str):
     return float(price)
 
 
+@app.route('/get/items')
+def get_items():
+    db = get_db()
+    cur = db.execute('SELECT id, name, price, image_link, color FROM Products ORDER BY id DESC')
+    rows = cur.fetchall()
+    all_items = {}
+    for row in rows:
+        all_items[row[0]] = build_item(row)
+    return json.dumps(all_items)
+
+
+def build_item(row):
+    item = {'name': row[1], 'price': row[2]}
+    if row[3]:
+        item['image_link'] = row[3]
+    if row[4]:
+        item['color'] = row[4]
+    return item
+
+
 @app.route('/get/item/<identifier>')
 def get_item(identifier):
     try:
@@ -162,6 +182,8 @@ def logout():
 
 @app.route('/work')
 def work_view():
+    if not session.get('logged_in'):
+        abort(401)
     global customer_number
     db = get_db()
     cur = db.execute('SELECT id, name, price, image_link, color FROM Products ORDER BY id DESC')
@@ -186,22 +208,32 @@ def allowed_file(filename):
            filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 
+def malformed_receipt(receipt):
+    for possible_item in receipt:
+        if 'sender' not in possible_item:
+            return False
+    pass
+
+
 @app.route('/add/transaction', methods=['POST'])
 def add_transaction():
     receipt = request.get_json(force=True)  # type: dict
+
+    if (not receipt) or malformed_receipt(receipt):
+        abort(422)
+
     db = get_db()
 
-    receipt_sum = float(receipt['sum'])
     del receipt['sum']
-    cur = db.execute('INSERT INTO Transactions (date, sum) VALUES (?, ?)',
-                     [str(datetime.now()), receipt_sum])
+    cur = db.execute('INSERT INTO Transactions ("from", "to", timestamp) VALUES (?, ?, ?)',
+                     [int(receipt['sender']), int(receipt['receiver']), str(datetime.now())])
     transaction_id = cur.lastrowid
     db.commit()
 
     for item_id, value in receipt.items():
         for _ in itertools.repeat(None, value['amount']):
-            db.execute('INSERT INTO items_to_transactions (item, "transaction") VALUES (?, ?)',
-                       [int(item_id), int(transaction_id)])
+            db.execute('INSERT INTO Transaction_Products ("transaction", product) VALUES (?, ?)',
+                       [int(transaction_id), int(item_id)])
     db.commit()
     return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
 
