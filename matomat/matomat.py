@@ -3,10 +3,9 @@ import locale
 import os
 import platform
 import sqlite3
-import subprocess
 import itertools
 from datetime import datetime
-from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash
+from flask import Flask, request, session, g, abort
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)  # create the application instance :)
@@ -169,7 +168,6 @@ def login():
 @app.route('/logout')
 def logout():
     session.pop('logged_in', None)
-    flash('You were logged out')
     return json.dumps('ok')
 
 
