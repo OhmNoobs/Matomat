@@ -71,14 +71,6 @@ def init_db():
     db.commit()
 
 
-@app.route('/')
-def show_items():
-    db = get_db()
-    cur = db.execute('SELECT id, name, price, image_link, color FROM Products ORDER BY id DESC')
-    items = cur.fetchall()
-    return render_template('manage_items.html', items=items)
-
-
 @app.route('/add/item', methods=['POST'])
 def add_item():
     if not session.get('logged_in'):
@@ -102,8 +94,7 @@ def add_item():
     db.execute('INSERT INTO Products (name, price, image_link, color) VALUES (?, ?, ?, ?)',
                [request.form['title'], price, filename, color])
     db.commit()
-    flash('New item was successfully added.')
-    return redirect(url_for('show_items'))
+    return json.dumps('New item was successfully added.')
 
 
 def evaluate_price(price: str):
@@ -157,7 +148,7 @@ def delete_item(identifier):
     db = get_db()
     db.execute('DELETE FROM Products WHERE id = (?)', [identifier])
     db.commit()
-    return redirect(url_for('show_items'))
+    return json.dumps('success')
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -179,30 +170,7 @@ def login():
 def logout():
     session.pop('logged_in', None)
     flash('You were logged out')
-    return redirect(url_for('show_items'))
-
-
-@app.route('/work')
-def work_view():
-    if not session.get('logged_in'):
-        abort(401)
-    global customer_number
-    db = get_db()
-    cur = db.execute('SELECT id, name, price, image_link, color FROM Products ORDER BY id DESC')
-    items = cur.fetchall()
-    customer_number += 1
-    return render_template('work_view.html', items=items, customer=customer_number)
-
-
-def print_receipt(data):
-    if platform.system() == 'Windows':
-        with open(app.config['PRINT_FILE']) as f:
-            f.write(data)
-        os.startfile(app.config['PRINT_FILE'], "print")
-    elif platform.system() == 'Linux':
-        print(data)
-        lpr = subprocess.run(["/dev/usb/pl0"], stdin=subprocess.PIPE)
-        lpr.stdin.write(str.encode(data))
+    return json.dumps('ok')
 
 
 def allowed_file(filename):
