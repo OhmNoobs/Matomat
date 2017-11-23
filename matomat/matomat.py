@@ -212,7 +212,7 @@ def malformed_receipt(receipt):
     for possible_item in receipt:
         if 'sender' not in possible_item:
             return False
-    pass
+    return True
 
 
 @app.route('/add/transaction', methods=['POST'])

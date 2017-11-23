@@ -136,15 +136,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     });
 
-    $('#finishProcess').click(function () {
-
-        $(".items").hide();
-        $("#finishProcess").hide();
-        $("#finishProcessTab").show();
-        $("#returnToAddItems").show();
-
-    });
-
     $('#closeInteraction').click(function () {
         const state = JSON.stringify(receipt_state);
         console.log(state);
