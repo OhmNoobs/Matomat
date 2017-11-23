@@ -19,15 +19,17 @@ app.config.update(dict(
     USERNAME='admin',
     PASSWORD='default',
     PATH_TO_ITEM_IMAGES=os.path.join(app.root_path, 'static', 'images'),
-    ALLOWED_EXTENSIONS=ALLOWED_EXTENSIONS,
-    LANG='de_DE'
+    ALLOWED_EXTENSIONS=ALLOWED_EXTENSIONS
 ))
 # And override config from an environment variable...
 # Simply define the environment variable CASHIER_SETTINGS that points to a config file to be loaded.
 app.config.from_envvar('CASHIER_SETTINGS', silent=True)
 customer_number = 0
-print(app.config['LANG'])
-locale.setlocale(locale.LC_ALL, app.config['LANG'])
+
+if platform.system() == 'Windows':
+    locale.setlocale(locale.LC_ALL, 'de-DE')
+elif platform.system() == 'Linux':
+    locale.setlocale(locale.LC_ALL, 'de_DE')
 
 
 @app.cli.command('initdb')
@@ -204,8 +206,7 @@ def print_receipt(data):
 
 
 def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 
 def malformed_receipt(receipt):
