@@ -21,7 +21,7 @@ app.config.update(dict(
     ALLOWED_EXTENSIONS=ALLOWED_EXTENSIONS
 ))
 # And override config from an environment variable...
-# Simply define the environment variable CASHIER_SETTINGS that points to a config file to be loaded.
+# Simply define the environment variable MATOMAT_SETTINGS that points to a config file to be loaded.
 app.config.from_envvar('MATOMAT_SETTINGS', silent=True)
 customer_number = 0
 
