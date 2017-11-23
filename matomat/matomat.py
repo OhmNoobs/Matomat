@@ -22,7 +22,7 @@ app.config.update(dict(
 ))
 # And override config from an environment variable...
 # Simply define the environment variable CASHIER_SETTINGS that points to a config file to be loaded.
-app.config.from_envvar('CASHIER_SETTINGS', silent=True)
+app.config.from_envvar('MATOMAT_SETTINGS', silent=True)
 customer_number = 0
 
 if platform.system() == 'Windows':
