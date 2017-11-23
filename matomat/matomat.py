@@ -123,7 +123,7 @@ def get_items():
 
 
 def build_item(row):
-    item = {'name': row[1], 'price': row[2]}
+    item = {'title': row[1], 'price': row[2]}
     if row[3]:
         item['image_link'] = row[3]
     if row[4]:
@@ -150,7 +150,7 @@ def get_item(identifier):
     return json.dumps(item_for_json)
 
 
-@app.route('/delete/item/<identifier>/')
+@app.route('/delete/item/<identifier>/', methods=['DELETE'])
 def delete_item(identifier):
     if not session.get('logged_in'):
         abort(401)
@@ -237,6 +237,16 @@ def add_transaction():
                        [int(transaction_id), int(item_id)])
     db.commit()
     return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
+
+
+@app.route('/add/credit', methods=['POST'])
+def add_credit():
+    pass
+
+
+@app.route('/get/balance/<user_id>', methods=['POST'])
+def get_balance(user_id):
+    pass
 
 
 if __name__ == '__main__':
