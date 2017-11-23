@@ -164,15 +164,15 @@ def delete_item(identifier):
 def login():
     error = None
     if request.method == 'POST':
-        if request.form['username'] != app.config['USERNAME']:
+        credentials = request.get_json(force=True)  # type: dict
+        if credentials['username'] != app.config['USERNAME']:
             error = 'Invalid username'
-        elif request.form['password'] != app.config['PASSWORD']:
+        elif credentials['password'] != app.config['PASSWORD']:
             error = 'Invalid password'
         else:
             session['logged_in'] = True
-            flash('You were logged in')
-            return redirect(url_for('show_items'))
-    return render_template('login.html', error=error)
+            return json.dumps({'result': 'ok'})
+    return json.dumps({'result': error})
 
 
 @app.route('/logout')
