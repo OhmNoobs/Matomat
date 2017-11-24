@@ -187,4 +187,19 @@ document.addEventListener('DOMContentLoaded', function () {
         $.post("/print/kitchen", JSON.stringify(receipt_state));
     });
 
+    $(document).bind('keypress', function(e) {
+        const cardID = $('#cardID');
+        if(e.which === 13)
+        {
+            alert(cardID.text());
+            cardID.text("");
+        }
+        else if(e.which > 47 && e.which < 58)
+        {
+            cardID.append(e.which - 48);
+
+        }
+    });
+
+
 }, false);
