@@ -107,14 +107,14 @@ def get_items():
     db = get_db()
     cur = db.execute('SELECT id, name, price, image_link, color FROM Products ORDER BY id DESC')
     rows = cur.fetchall()
-    all_items = {}
+    all_items = []
     for row in rows:
-        all_items[row[0]] = build_item(row)
+        all_items.append(build_item(row))
     return json.dumps(all_items)
 
 
 def build_item(row):
-    item = {'title': row[1], 'price': row[2]}
+    item = {'id': row[0], 'title': row[1], 'price': row[2]}
     if row[3]:
         item['image_link'] = row[3]
     if row[4]:
