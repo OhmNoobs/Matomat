@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block head %}
+<script src="../static/balance.js"></script>
+{% endblock %}
+{% block body %}
+  {% if session.logged_in %}
+  <div class=content>
+
+  <div id="dialPad">
+
+    <button data-number>1</button>
+    <button data-number>4</button>
+    <button data-number>7</button>
+    <button id="decimalPoint">.</button>
+
+    <button data-number>2</button>
+    <button data-number>5</button>
+    <button data-number>8</button>
+    <button data-number>0</button>
+
+    <button data-number>3</button>
+    <button data-number>6</button>
+    <button data-number>9</button>
+    <button></button>
+
+  </div>
+  <button id="resetInput">Clear</button>
+
+  <div id="finishProcessRow">
+    <div id="change"></div>€
+      <div id="input" style="display: none;"></div>
+    <button id="closeInteraction" type="submit">Verbuchen</button>
+  </div>
+</div>
+
+</div>
+  {% else %}
+    <em>Not logged in.</em>
+  {% endif %}
+{% endblock %}

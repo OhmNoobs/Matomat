@@ -1,0 +1,80 @@
+let input;
+
+function evaluate_input() {
+
+    let textInput = $("#input");
+    let displaydInput = $("#change");
+    let userInput = Number(textInput.val().replace(",", "."));
+
+    if (isNaN(userInput)) {
+        displaydInput.css("color", "red");
+        displaydInput.text("NaN!");
+        throw "NaN";
+    }
+
+    if (userInput > 0) {
+        displaydInput.css("color", "green")
+    } else  {
+        displaydInput.css("color", "red")
+    }
+    displaydInput.text(userInput.toFixed(2));
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    $('#closeInteraction').click(function () {
+        // display new balance
+
+        // goto kiosk
+        window.location.replace("/work");
+        $.post("/add/transaction", state, function () {
+             window.location.replace("/work");
+        });
+    });
+
+
+    $('#dialPad').find(':button').click(function () {
+
+        console.log($(this));
+        const attr = $(this).attr('data-number');
+        const sumAsText = $('#input');
+
+        if (typeof attr !== typeof undefined && attr !== false) {
+            sumAsText.text(sumAsText.text() + $(this).text());
+            evaluate_input();
+        }
+        else if ($(this).is('#decimalPoint')) {
+            sumAsText.text(sumAsText.text() + $(this).text());
+            evaluate_input();
+        }
+    });
+
+    $('#resetInput').click(function () {
+        $('#change').text("");
+    });
+
+    $(document).bind('keypress', function(e) {
+        const cardID = $('#cardID');
+        if(e.which === 13)
+        {
+            console.log("read: " + cardID.text());
+            cardID.text("");
+            if(receipt_state['sum'] === 0)
+            {
+                console.log("einzahlen :)")
+                window.location.replace("/balance");
+            }
+            else
+            {
+                console.log("abrechnen!")
+            }
+
+        }
+        else if(e.which > 47 && e.which < 58)
+        {
+            cardID.append(e.which - 48);
+        }
+    });
+
+
+}, false);

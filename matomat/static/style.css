@@ -140,11 +140,6 @@ dl.inline-flex dd {
     cursor: pointer;
 }
 
-#finishProcessTab {
-    display: None;
-    flex-grow: 1;
-}
-
 #dialPad {
     display: grid;
     grid: repeat(4, 60px) / auto-flow 60px;
@@ -181,17 +176,6 @@ dl.inline-flex dd {
 
 #finishProcessRow {
     text-align: center;
-}
-
-#returnToAddItems {
-    display: none;
-    width: 100%;
-    height: 2.5em;
-    border: 1px solid darkgrey;
-    color: darkgrey;
-    background-color: transparent;
-    border-radius: 13px;
-    cursor: pointer;
 }
 
 #finishProcessRow > button {

@@ -150,7 +150,7 @@ def get_item(identifier):
     return json.dumps(item_for_json)
 
 
-@app.route('/delete/item/<identifier>/', methods=['DELETE'])
+@app.route('/delete/item/<identifier>/')
 def delete_item(identifier):
     if not session.get('logged_in'):
         abort(401)
@@ -180,6 +180,11 @@ def logout():
     session.pop('logged_in', None)
     flash('You were logged out')
     return redirect(url_for('show_items'))
+
+
+@app.route('/balance')
+def balance_view():
+    return render_template('balance.html')
 
 
 @app.route('/work')

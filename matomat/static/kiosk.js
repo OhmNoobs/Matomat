@@ -34,7 +34,6 @@ function update_receipt_sum() {
     console.log(receipt_state);
     sum = sum.toFixed(2);
     $("#sum").text(sum);
-    $("#finishSum").text(sum);
     if ($("#change").text()) {
         evaluate_input()
     }
@@ -108,9 +107,8 @@ function contrast() {
 
 function evaluate_input() {
 
-    let sumDisplay = $("#receivedSum");
     let change = $("#change");
-    let userInput = Number(sumDisplay.val().replace(",", "."));
+    let userInput = Number(change.val().replace(",", "."));
 
     if (isNaN(userInput)) {
         change.css("color", "red");
@@ -118,13 +116,12 @@ function evaluate_input() {
         throw "NaN";
     }
 
-    let difference = (receipt_state['sum'] - userInput);
-    if (difference >= 0) {
-        change.css("color", "red")
-    } else {
+    if (userInput > 0) {
         change.css("color", "green")
+    } else  {
+        change.css("color", "red")
     }
-    change.text(difference.toFixed(2) + ' €');
+    change.text(userInput.toFixed(2) + ' €');
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -133,6 +130,15 @@ document.addEventListener('DOMContentLoaded', function () {
     $('.itemTitle').click(function () {
 
         add_to_receipt(Number($(this).attr('id')))
+
+    });
+
+    $('#finishProcess').click(function () {
+
+        $(".items").hide();
+        $("#finishProcess").hide();
+        $("#finishProcessTab").show();
+        $("#returnToAddItems").show();
 
     });
 
@@ -155,49 +161,52 @@ document.addEventListener('DOMContentLoaded', function () {
 
         console.log($(this));
         const attr = $(this).attr('data-number');
-        const sumDisplay = $('#receivedSum');
+        const sumDisplay = $('#change');
 
         if (typeof attr !== typeof undefined && attr !== false) {
-            sumDisplay.val(sumDisplay.val() + $(this).text());
+            sumDisplay.text(sumDisplay.text() + $(this).text());
         }
         else if ($(this).is('#decimalPoint')) {
-            sumDisplay.val(sumDisplay.val() + $(this).text());
+            sumDisplay.text(sumDisplay.text() + $(this).text());
         }
         else if ($(this).is('#evaluateInput')) {
             try {
                 evaluate_input();
             } catch (e) {
                 console.log(e);
-                sumDisplay.val("");
+                sumDisplay.text("");
                 return false;
             }
         }
     });
 
     $('#resetInput').click(function () {
-        $('#receivedSum').val("");
         $('#change').text("");
-    });
-
-    $('#printCustomerReceipt').click(function () {
-        $.post("/print/customer", JSON.stringify(receipt_state));
-    });
-
-    $('#printKitchenReceipt').click(function () {
-        $.post("/print/kitchen", JSON.stringify(receipt_state));
     });
 
     $(document).bind('keypress', function(e) {
         const cardID = $('#cardID');
         if(e.which === 13)
         {
-            alert(cardID.text());
+            console.log("read: " + cardID.text());
             cardID.text("");
+            if(receipt_state['sum'] === 0)
+            {
+                console.log("einzahlen :)")
+                $(".items").hide();
+                $("#finishProcess").hide();
+                $("#finishProcessTab").show();
+                $("#returnToAddItems").show();
+            }
+            else
+            {
+                console.log("abrechnen!")
+            }
+
         }
         else if(e.which > 47 && e.which < 58)
         {
             cardID.append(e.which - 48);
-
         }
     });
 
