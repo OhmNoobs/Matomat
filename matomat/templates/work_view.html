@@ -24,7 +24,13 @@
     {% endfor %}
 
     </div>
+<div id="rightRow">
+    <ol id="receipt"></ol>
 
+    <div id="sumRow">Sum: <span id="sum">0</span></div>
+    <button id="finishProcess">Zum Abschließen, Karte an Leser halten.</button>
+    <div id="cardID"></div>
+  </div>
 </div>
   {% else %}
     <em>Not logged in.</em>

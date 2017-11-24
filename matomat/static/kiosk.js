@@ -133,15 +133,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     });
 
-    $('#finishProcess').click(function () {
-
-        $(".items").hide();
-        $("#finishProcess").hide();
-        $("#finishProcessTab").show();
-        $("#returnToAddItems").show();
-
-    });
-
     $('#closeInteraction').click(function () {
         const state = JSON.stringify(receipt_state);
         console.log(state);
@@ -192,11 +183,8 @@ document.addEventListener('DOMContentLoaded', function () {
             cardID.text("");
             if(receipt_state['sum'] === 0)
             {
-                console.log("einzahlen :)")
-                $(".items").hide();
-                $("#finishProcess").hide();
-                $("#finishProcessTab").show();
-                $("#returnToAddItems").show();
+                console.log("einzahlen :)");
+                window.location = '/balance'
             }
             else
             {
