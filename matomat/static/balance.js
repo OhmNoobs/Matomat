@@ -18,15 +18,21 @@ function evaluate_input() {
         displaydInput.css("color", "red")
     }
     displaydInput.text(userInput.toFixed(2) + ' €');
+    return userInput;
 }
 
 document.addEventListener('DOMContentLoaded', function () {
 
-    $('#closeInteraction').click(function () {
-        // display new balance
-
-        // goto kiosk
-        $.post("/add/credit/", state, function () {
+    $('#book').click(function () {
+        let amount = evaluate_input();
+        let changed = {};
+        if(amount !== 0)
+        {
+            changed['amount'] = amount;
+            changed['user'] = Number($('#card_id').text().replace(",", ".")).toFixed(0);
+        }
+        console.log(changed);
+        $.post("/add/credit", changed, function () {
              window.location.replace("/work");
         });
     });

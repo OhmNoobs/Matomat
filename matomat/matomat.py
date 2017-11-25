@@ -275,7 +275,14 @@ def add_transaction():
 
 @app.route('/add/credit', methods=['POST'])
 def add_credit():
-    pass
+    change = request.get_json(force=True)  # type: dict
+    if not change or 'user' not in change or 'amount' not in change:
+        abort(422)
+    db = get_db()
+    amount = float(change['amount'])
+    user = int(change['user'])
+    db.execute('INSERT INTO Transactions ("from", "to", "total", "timestamp") VALUES (?, ?, ?, ?)',
+               [user, user, amount, str(datetime.now())])
 
 
 @app.route('/get/balance/<user_id>', methods=['POST'])
