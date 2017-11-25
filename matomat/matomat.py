@@ -34,13 +34,11 @@ elif platform.system() == 'Linux':
 
 @app.cli.command('initdb')
 def initdb_command():
-    """Initializes the database."""
     init_db()
     print('Initialized the database.')
 
 
 def connect_db():
-    """Connects to the specific database."""
     rv = sqlite3.connect(app.config['DATABASE'])
     rv.row_factory = sqlite3.Row
     rv.execute('PRAGMA foreign_keys = ON;')
@@ -49,9 +47,6 @@ def connect_db():
 
 
 def get_db():
-    """Opens a new database connection if there is none yet for the
-    current application context.
-    """
     if not hasattr(g, 'sqlite_db'):
         g.sqlite_db = connect_db()
     return g.sqlite_db
@@ -59,7 +54,6 @@ def get_db():
 
 @app.teardown_appcontext
 def close_db(error):
-    """Closes the database again at the end of the request."""
     if hasattr(g, 'sqlite_db'):
         g.sqlite_db.close()
 
@@ -198,11 +192,13 @@ def work_view():
 def balance_view(card_id):
     card_id = int(card_id)
     db = get_db()
-    cur = db.execute('SELECT id from Users WHERE card_id = ?', [card_id])
-    user = cur.fetchone()[0]
-    if not user:
+    cur = db.execute('SELECT id, name from Users WHERE card_id = ?', [card_id])
+    result = cur.fetchone()
+    if not result:
         flash("no user with your card exists")
         return
+    user = result[0]
+    name = result[1]
 
     cur_plus = db.execute('SELECT SUM(total) from Transactions WHERE "to" = ?', [user])
     plus = cur_plus.fetchone()[0]
@@ -213,7 +209,7 @@ def balance_view(card_id):
     if not minus:
         minus = 0
     total = plus - minus
-    return render_template('balance.html', balance=total)
+    return render_template('balance.html', balance=total, card_id=card_id, name=name)
 
 
 def print_receipt(data):

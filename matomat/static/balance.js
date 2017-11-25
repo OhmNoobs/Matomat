@@ -4,7 +4,7 @@ function evaluate_input() {
 
     let textInput = $("#input");
     let displaydInput = $("#change");
-    let userInput = Number(textInput.val().replace(",", "."));
+    let userInput = Number(textInput.text().replace(",", "."));
 
     if (isNaN(userInput)) {
         displaydInput.css("color", "red");
@@ -17,7 +17,7 @@ function evaluate_input() {
     } else  {
         displaydInput.css("color", "red")
     }
-    displaydInput.text(userInput.toFixed(2));
+    displaydInput.text(userInput.toFixed(2) + ' €');
 }
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -26,8 +26,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // display new balance
 
         // goto kiosk
-        window.location.replace("/work");
-        $.post("/add/transaction", state, function () {
+        $.post("/add/credit/", state, function () {
              window.location.replace("/work");
         });
     });
@@ -47,10 +46,19 @@ document.addEventListener('DOMContentLoaded', function () {
             sumAsText.text(sumAsText.text() + $(this).text());
             evaluate_input();
         }
+        else if ($(this).is('#minus')) {
+            if(sumAsText.text().startsWith("-"))
+                sumAsText.text(sumAsText.text().substr(1));
+            else{
+                sumAsText.text($(this).text() + sumAsText.text());
+            }
+            evaluate_input();
+        }
     });
 
     $('#resetInput').click(function () {
         $('#change').text("");
+        $('#input').text("");
     });
 
     $(document).bind('keypress', function(e) {
@@ -61,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
             cardID.text("");
             if(receipt_state['sum'] === 0)
             {
-                console.log("einzahlen :)")
+                console.log("einzahlen :)");
                 window.location.replace("/balance");
             }
             else

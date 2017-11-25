@@ -100,9 +100,7 @@ function contrast() {
         } else {
             $(this).css('color', 'white');
         }
-
     });
-
 }
 
 function evaluate_input() {
@@ -139,8 +137,9 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log("read: " + cardID.text());
             if (receipt_state['sum'] === 0) {
                 console.log("einzahlen :)");
-                cardID.text("");
-                window.location = '/balance'
+                let new_location = '/balance/' + cardID.text();
+                console.log("goto "+new_location)
+                window.location = new_location;
             }
             else {
                 console.log("abrechnen!");
@@ -152,8 +151,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     window.location.replace("/work");
                 });
             }
-
-
         }
         else if (e.which > 47 && e.which < 58) {
             cardID.append(e.which - 48);
