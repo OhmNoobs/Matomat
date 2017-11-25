@@ -118,7 +118,7 @@ function evaluate_input() {
 
     if (userInput > 0) {
         change.css("color", "green")
-    } else  {
+    } else {
         change.css("color", "red")
     }
     change.text(userInput.toFixed(2) + ' €');
@@ -133,67 +133,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
     });
 
-    $('#closeInteraction').click(function () {
-        const state = JSON.stringify(receipt_state);
-        console.log(state);
-        $.post("/add/transaction", state, function () {
-             window.location.replace("/work");
-        });
-    });
-
-    $('#returnToAddItems').click(function () {
-        $("#finishProcessTab").hide();
-        $("#returnToAddItems").hide();
-        $("#finishProcess").show();
-        $(".items").show();
-    });
-
-    $('#dialPad').find(':button').click(function () {
-
-        console.log($(this));
-        const attr = $(this).attr('data-number');
-        const sumDisplay = $('#change');
-
-        if (typeof attr !== typeof undefined && attr !== false) {
-            sumDisplay.text(sumDisplay.text() + $(this).text());
-        }
-        else if ($(this).is('#decimalPoint')) {
-            sumDisplay.text(sumDisplay.text() + $(this).text());
-        }
-        else if ($(this).is('#evaluateInput')) {
-            try {
-                evaluate_input();
-            } catch (e) {
-                console.log(e);
-                sumDisplay.text("");
-                return false;
-            }
-        }
-    });
-
-    $('#resetInput').click(function () {
-        $('#change').text("");
-    });
-
-    $(document).bind('keypress', function(e) {
+    $(document).bind('keypress', function (e) {
         const cardID = $('#cardID');
-        if(e.which === 13)
-        {
+        if (e.which === 13) {
             console.log("read: " + cardID.text());
-            cardID.text("");
-            if(receipt_state['sum'] === 0)
-            {
+            if (receipt_state['sum'] === 0) {
                 console.log("einzahlen :)");
+                cardID.text("");
                 window.location = '/balance'
             }
-            else
-            {
-                console.log("abrechnen!")
+            else {
+                console.log("abrechnen!");
+                receipt_state['sender'] = Number(cardID.text());
+                const state = JSON.stringify(receipt_state);
+                console.log(state);
+                $.post("/add/transaction", state, function () {
+                    cardID.text("");
+                    window.location.replace("/work");
+                });
             }
 
+
         }
-        else if(e.which > 47 && e.which < 58)
-        {
+        else if (e.which > 47 && e.which < 58) {
             cardID.append(e.which - 48);
         }
     });

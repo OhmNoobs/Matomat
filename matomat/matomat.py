@@ -182,11 +182,6 @@ def logout():
     return redirect(url_for('show_items'))
 
 
-@app.route('/balance')
-def balance_view():
-    return render_template('balance.html')
-
-
 @app.route('/work')
 def work_view():
     if not session.get('logged_in'):
@@ -197,6 +192,28 @@ def work_view():
     items = cur.fetchall()
     customer_number += 1
     return render_template('work_view.html', items=items, customer=customer_number)
+
+
+@app.route('/balance/<card_id>')
+def balance_view(card_id):
+    card_id = int(card_id)
+    db = get_db()
+    cur = db.execute('SELECT id from Users WHERE card_id = ?', [card_id])
+    user = cur.fetchone()[0]
+    if not user:
+        flash("no user with your card exists")
+        return
+
+    cur_plus = db.execute('SELECT SUM(total) from Transactions WHERE "to" = ?', [user])
+    plus = cur_plus.fetchone()[0]
+    if not plus:
+        plus = 0
+    cur_minus = db.execute('SELECT SUM(total) from Transactions WHERE "from" = ? AND "to" != ?', [user, user])
+    minus = cur_minus.fetchone()[0]
+    if not minus:
+        minus = 0
+    total = plus - minus
+    return render_template('balance.html', balance=total)
 
 
 def print_receipt(data):
@@ -214,28 +231,44 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
 
 
-def malformed_receipt(receipt):
-    for possible_item in receipt:
-        if 'sender' not in possible_item:
-            return False
-    return True
-
-
 @app.route('/add/transaction', methods=['POST'])
 def add_transaction():
     receipt = request.get_json(force=True)  # type: dict
-
-    if (not receipt) or malformed_receipt(receipt):
+    if not receipt:
         abort(422)
+
+    print(receipt)
+    if 'receiver' in receipt:
+        receiver = int(receipt['receiver'])
+        del receipt['receiver']
+    else:
+        receiver = 1
+
+    if 'sender' in receipt:
+        sender = receipt['sender']
+        del receipt['sender']
+    else:
+        flash("error")
+        return
+
+    if 'sum' in receipt:
+        grand_total = float(receipt['sum'])
+    else:
+        flash("error")
+        return
 
     db = get_db()
 
-    del receipt['sum']
-    cur = db.execute('INSERT INTO Transactions ("from", "to", timestamp) VALUES (?, ?, ?)',
-                     [int(receipt['sender']), int(receipt['receiver']), str(datetime.now())])
-    transaction_id = cur.lastrowid
-    db.commit()
+    cur = db.execute('SELECT id FROM Users WHERE card_id = ?', [sender])
+    user = cur.fetchone()
+    if not user:
+        flash("unknown user")
 
+    cur = db.execute('INSERT INTO Transactions ("from", "to", total, timestamp) VALUES (?, ?, ?, ?)',
+                     [user[0], receiver, grand_total, str(datetime.now())])
+    transaction_id = cur.lastrowid
+
+    del receipt['sum']
     for item_id, value in receipt.items():
         for _ in itertools.repeat(None, value['amount']):
             db.execute('INSERT INTO Transaction_Products ("transaction", product) VALUES (?, ?)',

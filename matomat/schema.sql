@@ -30,6 +30,7 @@ CREATE TABLE Transactions
   id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   "from" INTEGER NOT NULL,
   "to" INTEGER NOT NULL,
+  total REAL NOT NULL,
   timestamp TEXT NOT NULL,
   CONSTRAINT transactions_Users_id_fk FOREIGN KEY ("from") REFERENCES Users (id) ON UPDATE CASCADE,
   CONSTRAINT transactions_Users_id_fk FOREIGN KEY ("to") REFERENCES Users (id) ON UPDATE CASCADE
