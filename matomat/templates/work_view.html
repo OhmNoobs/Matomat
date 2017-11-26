@@ -3,7 +3,6 @@
 <script src="../static/kiosk.js"></script>
 {% endblock %}
 {% block body %}
-  {% if session.logged_in %}
   <div class=content>
     <div class=items>
     {% for item in items %}
@@ -32,7 +31,4 @@
     <div id="cardID"></div>
   </div>
 </div>
-  {% else %}
-    <em>Not logged in.</em>
-  {% endif %}
 {% endblock %}

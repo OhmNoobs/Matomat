@@ -1,4 +1,5 @@
 let input;
+let commaPressed = false;
 
 function evaluate_input() {
 
@@ -17,7 +18,10 @@ function evaluate_input() {
     } else  {
         displaydInput.css("color", "red")
     }
-    displaydInput.text(userInput.toFixed(2) + ' €');
+    if(commaPressed)
+        displaydInput.text(userInput.toFixed(2) + ' €');
+    else
+        displaydInput.text(userInput.toFixed(0) + ' €');
     return userInput;
 }
 
@@ -29,10 +33,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if(amount !== 0)
         {
             changed['amount'] = amount;
-            changed['user'] = Number($('#card_id').text().replace(",", ".")).toFixed(0);
+            changed['user'] = Number($('#userID').text()).toFixed(0);
         }
         console.log(changed);
-        $.post("/add/credit", changed, function () {
+        $.post("/add/credit", JSON.stringify(changed), function () {
              window.location.replace("/work");
         });
     });
@@ -49,6 +53,7 @@ document.addEventListener('DOMContentLoaded', function () {
             evaluate_input();
         }
         else if ($(this).is('#decimalPoint')) {
+            commaPressed = true;
             sumAsText.text(sumAsText.text() + $(this).text());
             evaluate_input();
         }
@@ -65,6 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
     $('#resetInput').click(function () {
         $('#change').text("");
         $('#input').text("");
+        commaPressed = false;
     });
 
     $(document).bind('keypress', function(e) {

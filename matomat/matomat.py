@@ -3,14 +3,13 @@ import locale
 import os
 import platform
 import sqlite3
-import subprocess
 import itertools
 from datetime import datetime
 from flask import Flask, request, session, g, redirect, url_for, abort, render_template, flash
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)  # create the application instance :)
-app.config.from_object(__name__)  # load config from this file, cashier.py
+app.config.from_object(__name__)  # load config from this file, matomat.py
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'svg', 'bmp', 'ico'}
 # Load default config
 app.config.update(dict(
@@ -22,8 +21,8 @@ app.config.update(dict(
     ALLOWED_EXTENSIONS=ALLOWED_EXTENSIONS
 ))
 # And override config from an environment variable...
-# Simply define the environment variable CASHIER_SETTINGS that points to a config file to be loaded.
-app.config.from_envvar('CASHIER_SETTINGS', silent=True)
+# Simply define the environment variable MATOMAT_SETTINGS that points to a config file to be loaded.
+app.config.from_envvar('MATOMAT_SETTINGS', silent=True)
 customer_number = 0
 
 if platform.system() == 'Windows':
@@ -105,17 +104,6 @@ def evaluate_price(price: str):
     return float(price)
 
 
-@app.route('/get/items')
-def get_items():
-    db = get_db()
-    cur = db.execute('SELECT id, name, price, image_link, color FROM Products ORDER BY id DESC')
-    rows = cur.fetchall()
-    all_items = {}
-    for row in rows:
-        all_items[row[0]] = build_item(row)
-    return json.dumps(all_items)
-
-
 def build_item(row):
     item = {'title': row[1], 'price': row[2]}
     if row[3]:
@@ -178,8 +166,6 @@ def logout():
 
 @app.route('/work')
 def work_view():
-    if not session.get('logged_in'):
-        abort(401)
     global customer_number
     db = get_db()
     cur = db.execute('SELECT id, name, price, image_link, color FROM Products ORDER BY id DESC')
@@ -209,18 +195,7 @@ def balance_view(card_id):
     if not minus:
         minus = 0
     total = plus - minus
-    return render_template('balance.html', balance=total, card_id=card_id, name=name)
-
-
-def print_receipt(data):
-    if platform.system() == 'Windows':
-        with open(app.config['PRINT_FILE']) as f:
-            f.write(data)
-        os.startfile(app.config['PRINT_FILE'], "print")
-    elif platform.system() == 'Linux':
-        print(data)
-        lpr = subprocess.run(["/dev/usb/pl0"], stdin=subprocess.PIPE)
-        lpr.stdin.write(str.encode(data))
+    return render_template('balance.html', balance=total, card_id=card_id, name=name, user_id=user)
 
 
 def allowed_file(filename):
@@ -229,29 +204,7 @@ def allowed_file(filename):
 
 @app.route('/add/transaction', methods=['POST'])
 def add_transaction():
-    receipt = request.get_json(force=True)  # type: dict
-    if not receipt:
-        abort(422)
-
-    print(receipt)
-    if 'receiver' in receipt:
-        receiver = int(receipt['receiver'])
-        del receipt['receiver']
-    else:
-        receiver = 1
-
-    if 'sender' in receipt:
-        sender = receipt['sender']
-        del receipt['sender']
-    else:
-        flash("error")
-        return
-
-    if 'sum' in receipt:
-        grand_total = float(receipt['sum'])
-    else:
-        flash("error")
-        return
+    grand_total, receipt, receiver, sender = parse_transaction_json()
 
     db = get_db()
 
@@ -273,6 +226,30 @@ def add_transaction():
     return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
 
 
+def parse_transaction_json():
+    receipt = request.get_json(force=True)  # type: dict
+    if not receipt:
+        abort(422)
+    print(receipt)
+    if 'receiver' in receipt:
+        receiver = int(receipt['receiver'])
+        del receipt['receiver']
+    else:
+        receiver = 1
+    if 'sender' in receipt:
+        sender = receipt['sender']
+        del receipt['sender']
+    else:
+        abort(422)
+        return
+    if 'sum' in receipt:
+        grand_total = float(receipt['sum'])
+    else:
+        abort(422)
+        return
+    return grand_total, receipt, receiver, sender
+
+
 @app.route('/add/credit', methods=['POST'])
 def add_credit():
     change = request.get_json(force=True)  # type: dict
@@ -283,6 +260,7 @@ def add_credit():
     user = int(change['user'])
     db.execute('INSERT INTO Transactions ("from", "to", "total", "timestamp") VALUES (?, ?, ?, ?)',
                [user, user, amount, str(datetime.now())])
+    db.commit()
 
 
 @app.route('/get/balance/<user_id>', methods=['POST'])
