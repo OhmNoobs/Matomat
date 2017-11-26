@@ -165,12 +165,14 @@ def logout():
 
 
 @app.route('/work')
-def work_view():
+def work_view(**kwargs):
     global customer_number
     db = get_db()
     cur = db.execute('SELECT id, name, price, image_link, color FROM Products ORDER BY id DESC')
     items = cur.fetchall()
     customer_number += 1
+    if kwargs and 'message' in kwargs:
+        flash(kwargs['message'])
     return render_template('work_view.html', items=items, customer=customer_number)
 
 
@@ -181,8 +183,8 @@ def balance_view(card_id):
     cur = db.execute('SELECT id, name from Users WHERE card_id = ?', [card_id])
     result = cur.fetchone()
     if not result:
-        flash("no user with your card exists")
-        return
+        flash("Your Card ID is not linked to a Matomat user account.")
+        return work_view()
     user = result[0]
     name = result[1]
 
@@ -223,7 +225,8 @@ def add_transaction():
             db.execute('INSERT INTO Transaction_Products ("transaction", product) VALUES (?, ?)',
                        [int(transaction_id), int(item_id)])
     db.commit()
-    return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
+    flash("You successfully bought mate :)")
+    return redirect(url_for('work_view'))
 
 
 def parse_transaction_json():
@@ -243,7 +246,7 @@ def parse_transaction_json():
         abort(422)
         return
     if 'sum' in receipt:
-        grand_total = float(receipt['sum'])
+        grand_total = float("{0:.2f}".format(receipt['sum']))
     else:
         abort(422)
         return
@@ -261,6 +264,7 @@ def add_credit():
     db.execute('INSERT INTO Transactions ("from", "to", "total", "timestamp") VALUES (?, ?, ?, ?)',
                [user, user, amount, str(datetime.now())])
     db.commit()
+    return work_view(message=f"You successfully added {amount}€ to your account!")
 
 
 @app.route('/get/balance/<user_id>', methods=['POST'])

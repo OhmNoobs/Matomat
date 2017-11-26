@@ -3,8 +3,12 @@
     <script src="../static/balance.js"></script>
 {% endblock %}
 {% block body %}
-        <div>Howdy {{ name }} (<span id="card_id">{{card_id}}</span> - <span id="userID">{{ user_id }}</span>) your Balance is: {{ balance }}</div>
+        <h2>Howdy {{ name }} (Card ID: <span id="card_id">{{card_id}}</span> - User ID: <span id="userID">{{ user_id }}</span>) your Balance is: {{ "{0:.2f}".format(balance) }}</h2>
+    <p>If you want to add money to you account use the dial pad below and press "Add to balance" once you're finished.</p>
+    <div id="change"></div>
+
     <div class=content>
+    <button id="resetInput">Clear</button>
         <div id="dialPad">
             <button data-number>1</button>
             <button data-number>4</button>
@@ -21,12 +25,10 @@
             <button data-number>9</button>
             <button id="minus">-</button>
         </div>
-        <button id="resetInput">Clear</button>
 
-        <div id="change"></div>
-        €
-        <div id="input"></div>
-        <button id="book" type="submit">Verbuchen</button>
+
+        <div id="input" style="display: none;"></div>
+        <button id="book" type="submit">Add to balance!</button>
     </div>
 
 {% endblock %}

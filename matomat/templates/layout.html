@@ -10,15 +10,8 @@
 </head>
 <body>
 <div class=page>
-  <h1>Matomat</h1>
+  <h1>Ohm FSIN Matomat</h1>
   <div class=metanav>
-  <a href="{{ url_for('show_items') }}">Modify Items</a>
-  <a href="{{ url_for('work_view') }}">Work</a>
-  {% if not session.logged_in %}
-    <a href="{{ url_for('login') }}">log in</a>
-  {% else %}
-    <a href="{{ url_for('logout') }}">log out</a>
-  {% endif %}
   </div>
   {% for message in get_flashed_messages() %}
     <div class=flash>{{ message }}</div>

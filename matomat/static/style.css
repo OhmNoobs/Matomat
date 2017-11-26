@@ -189,8 +189,16 @@ dl.inline-flex dd {
     margin-bottom: 1em;
 }
 
-#resetInput {
-    height: 45px;
+#resetInput, #book {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    height: 50px;
+    font-size: 1.6em;
+    border: 1px;
+    border-radius: 3px;
+    margin: 2em;
 }
 
 #change {

@@ -49,6 +49,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const sumAsText = $('#input');
 
         if (typeof attr !== typeof undefined && attr !== false) {
+            if(commaPressed && sumAsText.text().split('.')[1].length > 1)
+                return;
             sumAsText.text(sumAsText.text() + $(this).text());
             evaluate_input();
         }
@@ -73,28 +75,6 @@ document.addEventListener('DOMContentLoaded', function () {
         commaPressed = false;
     });
 
-    $(document).bind('keypress', function(e) {
-        const cardID = $('#cardID');
-        if(e.which === 13)
-        {
-            console.log("read: " + cardID.text());
-            cardID.text("");
-            if(receipt_state['sum'] === 0)
-            {
-                console.log("einzahlen :)");
-                window.location.replace("/balance");
-            }
-            else
-            {
-                console.log("abrechnen!")
-            }
-
-        }
-        else if(e.which > 47 && e.which < 58)
-        {
-            cardID.append(e.which - 48);
-        }
-    });
 
 
 }, false);
