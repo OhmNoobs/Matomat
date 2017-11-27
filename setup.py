@@ -1,10 +1,10 @@
 from setuptools import setup
 
 setup(
-    name='matomat',
-    packages=['matomat'],
+    name='main',
+    packages=['main'],
     include_package_data=True,
     install_requires=[
-        'matomat',
+        'main',
     ],
 )

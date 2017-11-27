@@ -1,3 +1,3 @@
-graft matomat/templates
-graft matomat/static
-include matomat/schema.sql
+graft main/templates
+graft main/static
+include main/schema.sql

@@ -1,7 +1,5 @@
 import json
-import locale
 import os
-import platform
 import sqlite3
 import itertools
 from datetime import datetime
@@ -9,7 +7,7 @@ from flask import Flask, request, session, g, redirect, url_for, abort, render_t
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)  # create the application instance :)
-app.config.from_object(__name__)  # load config from this file, matomat.py
+app.config.from_object(__name__)  # load config from this file, main.py
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'svg', 'bmp', 'ico'}
 # Load default config
 app.config.update(dict(
@@ -24,11 +22,6 @@ app.config.update(dict(
 # Simply define the environment variable MATOMAT_SETTINGS that points to a config file to be loaded.
 app.config.from_envvar('MATOMAT_SETTINGS', silent=True)
 customer_number = 0
-
-if platform.system() == 'Windows':
-    locale.setlocale(locale.LC_ALL, 'de-DE')
-elif platform.system() == 'Linux':
-    locale.setlocale(locale.LC_ALL, 'de_DE')
 
 
 @app.cli.command('initdb')
@@ -267,10 +260,5 @@ def add_credit():
     return work_view(message=f"You successfully added {amount}€ to your account!")
 
 
-@app.route('/get/balance/<user_id>', methods=['POST'])
-def get_balance(user_id):
-    pass
-
-
 if __name__ == '__main__':
-    app.run()
+    app.run(host='0.0.0.0', debug=True, port=80)
