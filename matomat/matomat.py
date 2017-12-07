@@ -91,10 +91,11 @@ def add_item():
                 file.save(os.path.join(app.config['PATH_TO_ITEM_IMAGES'], filename))
             color = None
     db = get_db()
-    db.execute('INSERT INTO Products (name, price, image_link, color) VALUES (?, ?, ?, ?)',
-               [item_info['title'], price, filename, color])
+    cursor = db.cursor()
+    cursor.execute('INSERT INTO Products (name, price, image_link, color) VALUES (?, ?, ?, ?)',
+                   [item_info['title'], price, filename, color])
     db.commit()
-    return get_item()
+    return get_item(cursor.lastrowid)
 
 
 def evaluate_price(price: str):
