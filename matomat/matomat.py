@@ -92,7 +92,7 @@ def add_item():
             color = None
     db = get_db()
     cursor = db.cursor()
-    cursor.execute('INSERT INTO Products (name, price, image_link, color) VALUES (?, ?, ?, ?)',
+    cursor.execute('INSERT INTO Products (name, price, image, color) VALUES (?, ?, ?, ?)',
                    [item_info['title'], price, filename, color])
     db.commit()
     return get_item(cursor.lastrowid)
@@ -106,7 +106,7 @@ def evaluate_price(price: str):
 @app.route('/get/items')
 def get_items():
     db = get_db()
-    cur = db.execute('SELECT id, name, price, image_link, color FROM Products ORDER BY id DESC')
+    cur = db.execute('SELECT id, name, price, image, color FROM Products ORDER BY id DESC')
     rows = cur.fetchall()
     all_items = []
     for row in rows:
@@ -117,7 +117,7 @@ def get_items():
 def build_item(row):
     item = {'id': row[0], 'title': row[1], 'price': row[2]}
     if row[3]:
-        item['image_link'] = row[3]
+        item['image'] = row[3]
     if row[4]:
         item['color'] = row[4]
     return item
@@ -130,13 +130,13 @@ def get_item(identifier):
     except ValueError:
         abort(400)
     db = get_db()
-    cur = db.execute('SELECT id, name, price, image_link, color FROM Products WHERE id = (?)', [identifier])
+    cur = db.execute('SELECT id, name, price, image, color FROM Products WHERE id = (?)', [identifier])
     item = cur.fetchone()
     if not item:
         abort(400)
     item_for_json = {'id': item[0], 'title': item[1], 'price': item[2]}
     if item[3]:
-        item_for_json.update({'image_link': f'static/images/{item[3]}'})
+        item_for_json.update({'image': item[3]})
     if item[4]:
         item_for_json.update({'color': item[4]})
     return json.dumps(item_for_json)

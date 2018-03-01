@@ -5,7 +5,7 @@ CREATE TABLE Products
   id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
   name TEXT NOT NULL,
   price REAL NOT NULL,
-  image_link TEXT,
+  image TEXT,
   color TEXT
 );
 CREATE UNIQUE INDEX Products_id_uindex ON Products (id);
