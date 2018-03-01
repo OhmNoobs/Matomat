@@ -1,7 +1,5 @@
 import json
-import locale
 import os
-import platform
 import sqlite3
 import itertools
 from datetime import datetime
@@ -73,23 +71,12 @@ def add_item():
         abort(401)
     price = evaluate_price(item_info['price'])
     color = item_info['color']
-    filename = None
-    # check if the post request has the file part
-    if 'file' in request.files:
-        file = request.files['file']
-        # check if the file part contains a value and is allowed
-        if file.filename != '' and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            try:
-                file.save(os.path.join(app.config['PATH_TO_ITEM_IMAGES'], filename))
-            except FileNotFoundError:
-                os.mkdir(os.path.join(app.root_path, 'static', 'images'))
-                file.save(os.path.join(app.config['PATH_TO_ITEM_IMAGES'], filename))
-            color = None
+    if 'image' in item_info:
+        image = item_info['image']
     db = get_db()
     cursor = db.cursor()
     cursor.execute('INSERT INTO Products (name, price, image, color) VALUES (?, ?, ?, ?)',
-                   [item_info['title'], price, filename, color])
+                   [item_info['title'], price, image, color])
     db.commit()
     return get_item(cursor.lastrowid)
 
