@@ -25,10 +25,6 @@ app.config.update(dict(
 app.config.from_envvar('MATOMAT_SETTINGS', silent=True)
 customer_number = 0
 
-if platform.system() == 'Windows':
-    locale.setlocale(locale.LC_ALL, 'de-DE')
-elif platform.system() == 'Linux':
-    locale.setlocale(locale.LC_ALL, 'de_DE')
 
 
 @app.cli.command('initdb')
