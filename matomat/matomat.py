@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 import json
 import os
 import sqlite3
 import itertools
-from datetime import datetime
 from flask import Flask, request, session, g, abort
-from werkzeug.utils import secure_filename
+from datetime import datetime
+
 
 app = Flask(__name__)  # create the application instance :)
 app.config.from_object(__name__)  # load config from this file, cashier.py
@@ -21,8 +22,6 @@ app.config.update(dict(
 # And override config from an environment variable...
 # Simply define the environment variable MATOMAT_SETTINGS that points to a config file to be loaded.
 app.config.from_envvar('MATOMAT_SETTINGS', silent=True)
-customer_number = 0
-
 
 
 @app.cli.command('initdb')
@@ -64,13 +63,21 @@ def init_db():
     db.commit()
 
 
-@app.route('/add/item', methods=['POST'])
+@app.route('/api')
+def hello_humans():
+    return "This is an API, not for HOOOOMANS!"
+
+
+@app.route('/api/add/item', methods=['POST'])
 def add_item():
     item_info = request.get_json(force=True)  # type: dict
     if not session.get('logged_in'):
         abort(401)
+    if not item_info or 'price' not in item_info or 'title' not in item_info:
+        abort(400)
     price = evaluate_price(item_info['price'])
     color = item_info['color']
+    image = None
     if 'image' in item_info:
         image = item_info['image']
     db = get_db()
@@ -86,7 +93,7 @@ def evaluate_price(price: str):
     return float(price)
 
 
-@app.route('/get/items')
+@app.route('/api/get/items')
 def get_items():
     db = get_db()
     cur = db.execute('SELECT id, name, price, image, color FROM Products ORDER BY id DESC')
@@ -106,7 +113,7 @@ def build_item(row):
     return item
 
 
-@app.route('/get/item/<identifier>')
+@app.route('/api/get/item/<identifier>')
 def get_item(identifier):
     try:
         int(identifier)
@@ -125,7 +132,7 @@ def get_item(identifier):
     return json.dumps(item_for_json)
 
 
-@app.route('/delete/item/<identifier>/', methods=['DELETE'])
+@app.route('/api/delete/item/<identifier>/', methods=['DELETE'])
 def delete_item(identifier):
     if not session.get('logged_in'):
         abort(401)
@@ -135,7 +142,7 @@ def delete_item(identifier):
     return json.dumps('success')
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/api/login', methods=['GET', 'POST'])
 def login():
     error = None
     if request.method == 'POST':
@@ -145,12 +152,16 @@ def login():
         elif credentials['password'] != app.config['PASSWORD']:
             error = 'Invalid password'
         else:
+
+            # expire_date = datetime.now()
+            # expire_date = expire_date + datetime.timedelta(days=90)
+            # response.set_cookie(key, guid, expires=expire_date)
             session['logged_in'] = True
             return json.dumps({'result': 'ok'})
     return json.dumps({'result': error})
 
 
-@app.route('/logout')
+@app.route('/api/logout')
 def logout():
     session.pop('logged_in', None)
     return json.dumps('ok')
@@ -167,7 +178,7 @@ def malformed_receipt(receipt):
     return True
 
 
-@app.route('/add/transaction', methods=['POST'])
+@app.route('/api/add/transaction', methods=['POST'])
 def add_transaction():
     receipt = request.get_json(force=True)  # type: dict
 
@@ -190,15 +201,40 @@ def add_transaction():
     return json.dumps({'success': True}), 200, {'ContentType': 'application/json'}
 
 
-@app.route('/add/credit', methods=['POST'])
+@app.route('/api/update/item', methods=['PUT'])
+def update_item_shorthand():
+    item_info = request.get_json(force=True)  # type: dict
+    if not session.get('logged_in'):
+        abort(401)
+    if not item_info or 'price' not in item_info or 'title' not in item_info:
+        abort(400)
+    update_item(item_info['id'])
+
+
+@app.route('/api/update/item/<identifier>', methods=['PUT'])
+def update_item(identifier):
+    item_info = request.get_json(force=True)  # type: dict
+    if not session.get('logged_in'):
+        abort(401)
+    if not item_info or 'price' not in item_info or 'title' not in item_info or identifier != item_info['id']:
+        abort(400)
+    price = evaluate_price(item_info['price'])
+    color = item_info['color']
+    image = None
+    if 'image' in item_info:
+        image = item_info['image']
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute('UPDATE Products SET name = ?, price = ?, image = ?, color = ? WHERE id = ?',
+                   [item_info['title'], price, image, color, identifier])
+    db.commit()
+
+
+@app.route('/api/add/credit', methods=['POST'])
 def add_credit():
     pass
 
 
-@app.route('/get/balance/<user_id>', methods=['POST'])
+@app.route('/api/get/balance/<user_id>', methods=['POST'])
 def get_balance(user_id):
     pass
-
-
-if __name__ == '__main__':
-    app.run()
