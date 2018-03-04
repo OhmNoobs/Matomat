@@ -89,7 +89,8 @@ def add_item():
 
 
 def evaluate_price(price: str):
-    price = price.replace(',', '.')
+    if isinstance(price, str):
+        price = price.replace(',', '.')
     return float(price)
 
 
