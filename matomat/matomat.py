@@ -209,7 +209,7 @@ def update_item_shorthand():
         abort(401)
     if not item_info or 'price' not in item_info or 'title' not in item_info:
         abort(400)
-    update_item(item_info['id'])
+    return update_item(item_info['id'])
 
 
 @app.route('/api/update/item/<identifier>', methods=['PUT'])
