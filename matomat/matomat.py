@@ -229,6 +229,7 @@ def update_item(identifier):
     cursor.execute('UPDATE Products SET name = ?, price = ?, image = ?, color = ? WHERE id = ?',
                    [item_info['title'], price, image, color, identifier])
     db.commit()
+    return get_item(identifier)
 
 
 @app.route('/api/add/credit', methods=['POST'])
